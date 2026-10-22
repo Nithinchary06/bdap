@@ -1,0 +1,53 @@
+EXPERIMENT 2 — SQOOP IMPORT/EXPORT AND FLUME LOG COLLECTION
+==========================================================
+Aim: Transfer relational data between MySQL and HDFS using Sqoop and collect logs with Flume.
+Execution locations: SQL in MySQL; Sqoop/Flume commands in Linux terminal.
+
+# In MySQL, create a sample database and table.
+CREATE DATABASE college;
+USE college;
+CREATE TABLE student(id INT, name VARCHAR(40));
+INSERT INTO student VALUES (1,'Ravi'),(2,'Sita');
+
+# In a Linux terminal, import the table into HDFS.
+# -P prompts for the database password; use credentials configured for your lab.
+sqoop import --connect jdbc:mysql://localhost:3306/college \
+  --username root -P --table student \
+  --target-dir /lab/student -m 1
+
+# Export example: target table must already exist and have a compatible schema.
+sqoop export --connect jdbc:mysql://localhost:3306/college \
+  --username root -P --table student \
+  --export-dir /lab/student -m 1
+
+# Save the following configuration as flume.conf.
+# The source tails /tmp/app.log; the sink writes events to HDFS.
+a1.sources = s1
+a1.channels = c1
+a1.sinks = k1
+a1.sources.s1.type = exec
+a1.sources.s1.command = tail -F /tmp/app.log
+a1.sources.s1.channels = c1
+a1.channels.c1.type = memory
+a1.channels.c1.capacity = 1000
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = hdfs://localhost:9000/flume/logs
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.channel = c1
+
+# In a Linux terminal, create the log file and launch the configured agent.
+touch /tmp/app.log
+flume-ng agent --conf . --conf-file flume.conf --name a1
+
+# In another terminal, append a test event while Flume is running.
+echo 'test log' >> /tmp/app.log
+
+# Verify imported data and Flume output in HDFS.
+hdfs dfs -ls /lab/student
+hdfs dfs -ls /flume/logs
+
+Execution / verification:
+1. Confirm the MySQL table contains rows before importing.
+2. Run the import and inspect /lab/student in HDFS.
+3. Keep Flume running, append test lines, and check the configured HDFS sink.
+Note: Sqoop and Flume are legacy tools; versions and JDBC connector must be compatible.

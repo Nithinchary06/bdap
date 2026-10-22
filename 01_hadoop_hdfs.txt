@@ -1,0 +1,47 @@
+EXPERIMENT 1 — HADOOP PSEUDO-DISTRIBUTED MODE AND HDFS
+====================================================
+Aim: Configure Hadoop in pseudo-distributed mode and perform HDFS file operations.
+Execution location: Linux/WSL terminal, or the college-provided Cloudera VM terminal.
+
+# Check installed versions before changing configuration.
+hadoop version
+java -version
+
+# Fresh installation/configuration only:
+# Configure core-site.xml, hdfs-site.xml, and environment variables as directed
+# by your lab manual. Format ONLY a brand-new NameNode; never format one with data.
+# hdfs namenode -format
+
+# Start services only if they are stopped and you have permission.
+start-dfs.sh
+# Optional when the practical requires YARN:
+start-yarn.sh
+# Confirm Hadoop daemons that are applicable to this environment.
+jps
+
+# Create a local sample file before uploading it.
+echo "Big Data Platforms Lab" > sample.txt
+
+# Create an HDFS directory and upload the file.
+hdfs dfs -mkdir -p /lab
+hdfs dfs -put sample.txt /lab/
+
+# List and read the uploaded file.
+hdfs dfs -ls /lab
+hdfs dfs -cat /lab/sample.txt
+
+# Download a copy from HDFS to the current local directory.
+hdfs dfs -get /lab/sample.txt .
+
+# Show item counts and file checksum.
+hdfs dfs -count /lab
+hdfs dfs -checksum /lab/sample.txt
+
+# Destructive examples: uncomment only when you intend to delete these paths.
+# hdfs dfs -rm /lab/sample.txt
+# hdfs dfs -rm -r /lab/old_directory
+
+Execution / verification:
+1. Run commands one by one in the configured Hadoop environment.
+2. Confirm /lab/sample.txt appears in the listing and displays the expected text.
+3. Do not run setup/format commands blindly on the college VM.

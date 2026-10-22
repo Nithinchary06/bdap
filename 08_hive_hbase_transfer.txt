@@ -1,0 +1,32 @@
+EXPERIMENT 8 — HIVE AND HBASE DATA TRANSFER
+==========================================
+Aim: Map an HBase table into Hive and query HBase-backed records.
+Run HBase commands in HBase shell and SQL in Hive CLI/Beeline.
+Requires compatible Hive-HBase storage-handler libraries/configuration.
+
+# HBASE SHELL — create and populate the source table (run once if absent).
+create 'employee_hb', 'info'
+put 'employee_hb','1','info:name','John'
+put 'employee_hb','1','info:department','IT'
+put 'employee_hb','1','info:salary','50000'
+put 'employee_hb','2','info:name','Alice'
+put 'employee_hb','2','info:department','HR'
+put 'employee_hb','2','info:salary','45000'
+
+-- HIVE/BEELINE — create an external mapping to the HBase table.
+CREATE EXTERNAL TABLE hive_employee (
+    id STRING, name STRING, department STRING, salary STRING
+)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+    'hbase.columns.mapping'=':key,info:name,info:department,info:salary'
+)
+TBLPROPERTIES ('hbase.table.name'='employee_hb');
+
+-- Query the mapped records in Hive.
+SELECT * FROM hive_employee;
+
+# HBASE SHELL — verify the same data is present.
+scan 'employee_hb'
+
+Expected check: Hive shows row key, name, department and salary.

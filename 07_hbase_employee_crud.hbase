@@ -1,0 +1,39 @@
+# EXPERIMENT 7 — HBASE employee_details CRUD
+# Aim: Create employee_details, insert records, read, update and delete cells/rows.
+# Execute all commands in the HBase shell (start it with: hbase shell).
+
+# Create a table with two column families. Run once only if table does not exist.
+create 'employee_details', 'PersonalInfo', 'ProfessionalInfo'
+
+# Insert sample employee E001.
+put 'employee_details','E001','PersonalInfo:name','Asha'
+put 'employee_details','E001','PersonalInfo:age','22'
+put 'employee_details','E001','PersonalInfo:gender','Female'
+put 'employee_details','E001','ProfessionalInfo:designation','Analyst'
+put 'employee_details','E001','ProfessionalInfo:salary','35000'
+put 'employee_details','E001','ProfessionalInfo:department','IT'
+
+# Insert sample employee E002.
+put 'employee_details','E002','PersonalInfo:name','Ravi'
+put 'employee_details','E002','PersonalInfo:age','23'
+put 'employee_details','E002','PersonalInfo:gender','Male'
+put 'employee_details','E002','ProfessionalInfo:designation','Developer'
+put 'employee_details','E002','ProfessionalInfo:salary','42000'
+put 'employee_details','E002','ProfessionalInfo:department','IT'
+
+# Repeat the six put commands above for E003 through E010 using the values in your lab record.
+# Read one employee and scan all rows.
+get 'employee_details','E001'
+scan 'employee_details'
+
+# Update a cell by writing a new value.
+put 'employee_details','E001','ProfessionalInfo:salary','40000'
+get 'employee_details','E001'
+
+# Delete one cell, then delete the entire row (destructive).
+delete 'employee_details','E001','ProfessionalInfo:salary'
+# Uncomment only if you intend to delete all cells for E001:
+# deleteall 'employee_details','E001'
+scan 'employee_details'
+
+# Verification: get shows one row; scan shows table rows; updated salary is visible before deletion.
